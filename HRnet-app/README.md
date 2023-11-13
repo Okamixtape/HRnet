@@ -8,7 +8,7 @@ in order to perform Lighthouse performance tests comparing the old and new appli
 
 ## Original HRnet Application
 
-Here is the [list of issue](https://github.com/OpenClassrooms-Student-Center/P12_Front-end/issues) found on the original application.
+Here is the [list of issues](https://github.com/OpenClassrooms-Student-Center/P12_Front-end/issues) found on the original application.
 
 ## Features
 
@@ -43,7 +43,7 @@ The page will reload when you make changes.
 To build the app for production, run the following command:
 
 ```bash
-npm build
+npm run build
 ```
 
 Then you can use [serve](https://www.npmjs.com/package/serve) which helps you serve a static site, single page application or just a static file

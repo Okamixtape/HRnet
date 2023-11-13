@@ -1,0 +1,55 @@
+.header {
+  font-family: 'Agbalumo', serif;
+  color: #3E4E02;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+
+  &__title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+
+    & h1 {
+      font-size: 100px;
+    }
+    & span {
+      font-size: 30px;
+    }
+  }
+
+  &__nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__navButton {
+    transition: 300ms;
+    border-radius: 5px;
+    background-color: #3E4E02;
+    padding: 17px;
+    color: white;
+    font-family: 'Agbalumo', sans-serif;
+    &:hover {
+      opacity: 0.9;
+    }
+    &:active {
+      scale: 0.98;
+    }
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .header {
+    margin: 0;
+    flex-direction: column;
+  }
+  .header__title {
+    margin-bottom: 40px;
+  }
+}

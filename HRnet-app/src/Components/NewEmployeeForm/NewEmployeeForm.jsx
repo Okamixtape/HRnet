@@ -42,39 +42,39 @@ const NewEmployeeForm = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  // The user state is defined with the following properties
-  const [user, setUser] = useState({
-    id: '',
-    firstName: '',
-    lastName: '',
-    dateOfBirth: '',
-    startDate: '',
-    street: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    department: '',
-  })
-
-  // The errors state is defined with the following properties
-  const [errors, setErrors] = useState({
-    firstName: false,
-    lastName: false,
-    dateOfBirth: false,
-    startDate: false,
-    street: false,
-    city: false,
-    zipCode: false,
-    department: false,
+  // The user data state is defined with the following properties
+  const [userData, setUserData] = useState({
+    user: {
+      id: '',
+      firstName: '',
+      lastName: '',
+      dateOfBirth: '',
+      startDate: '',
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      department: '',
+    },
+    errors: {
+      firstName: false,
+      lastName: false,
+      dateOfBirth: false,
+      startDate: false,
+      street: false,
+      city: false,
+      zipCode: false,
+      department: false,
+    },
+    birthDate: null,
+    startDate: null,
+    userDepartment: '',
+    userLocationState: '',
+    isShown: false,
+    formIsValid: null,
   });
 
-  const [birthDate, setBirthdate] = useState(null)
-  const [startDate, setStartdate] = useState(null)
-  const [userDepartment, setuserDepartment] = useState('')
-  const [userLocationState, setuserLocationState] = useState('')
-  const [isShown, setIsShown] = useState(false)
-  const [formIsValid, setFormIsValid] = useState(null)
-
+  // This is used to handle the datepicker of date of birth and start date
   const datePickerHandle = (name, value) => {
     let isValid = true;
     if (name === 'dateOfBirth') {
@@ -83,17 +83,20 @@ const NewEmployeeForm = () => {
       isValid = dateRegex.test(value.format('MM/DD/YYYY')) && !isOneMonthInFuture(value);
     }
   
-    setUser(prevState => ({
-      ...prevState,
-      [name]: value.format('MM/DD/YYYY'),
-    }));
-  
-    setErrors(prevState => ({
-      ...prevState,
-      [name]: !isValid,
+    setUserData(prevData => ({
+      ...prevData,
+      user: {
+        ...prevData.user,
+        [name]: value,
+      },
+      errors: {
+        ...prevData.errors,
+        [name]: !isValid,
+      },
     }));
   }
 
+  // This is used to handle the inputs of the form
   const inputHandle = (e) => {
     const { name, value } = e.target;
   
@@ -114,17 +117,20 @@ const NewEmployeeForm = () => {
         break;
     }
   
-    setUser(prevState => ({
-      ...prevState,
-      [name]: value,
+    setUserData(prevData => ({
+      ...prevData,
+      user: {
+        ...prevData.user,
+        [name]: value,
+      },
+      errors: {
+        ...prevData.errors,
+        [name]: !isValid,
+      },
     }));
-  
-    setErrors(prevState => ({
-      ...prevState,
-      [name]: !isValid,
-    }));
-  }
+  };
 
+  // This is used to define the modal content
   const formValidModal = {
     title: 'valid',
     icon: formValid,
@@ -133,6 +139,7 @@ const NewEmployeeForm = () => {
     cta: 'Employee added !',
   }
 
+  // This is used to define the modal content
   const formErrorModal = {
     title: 'error',
     icon: formError,
@@ -177,43 +184,50 @@ const NewEmployeeForm = () => {
 
   // Form validation
   const handleSubmit = (e) => {
-
-  const isDOBValid = !isFutureDate(user.dateOfBirth) && getAge(user.dateOfBirth) >= 18;
-  const isStartDateValid = !isOneMonthInFuture(user.startDate) && new Date(user.startDate) > new Date(user.dateOfBirth);
-
-  const isValidName = nameRegex.test(user.firstName) && nameRegex.test(user.lastName);
-  const isValidDateOfBirth = dateRegex.test(user.dateOfBirth);
-  const isValidStartDate = dateRegex.test(user.startDate);
-  const isValidStreet = addressRegex.test(user.street);
-  const isValidCity = addressRegex.test(user.city);
-  const isValidZipCode = zipCodeRegex.test(user.zipCode);
-
-  const isFormValid = isValidName && 
-                      isDOBValid && 
-                      isStartDateValid && 
-                      isValidDateOfBirth &&
-                      isValidStartDate &&
-                      isValidStreet && 
-                      isValidCity && 
-                      user.state !== '' && 
-                      isValidZipCode && 
-                      user.department !== '';
-    
-    // If the form is valid, the user is added to the application's state
+    const { user } = userData;
+  
+    const isDOBValid = !isFutureDate(user.dateOfBirth) && getAge(user.dateOfBirth) >= 18;
+    const isStartDateValid = !isOneMonthInFuture(user.startDate) && new Date(user.startDate) > new Date(user.dateOfBirth);
+  
+    const isValidName = nameRegex.test(user.firstName) && nameRegex.test(user.lastName);
+    const isValidAddress = addressRegex.test(user.street) && addressRegex.test(user.city);
+    const isValidZipCode = zipCodeRegex.test(user.zipCode);
+  
+    const isFormValid = isValidName && 
+                        isDOBValid && 
+                        isStartDateValid && 
+                        isValidAddress &&
+                        user.state !== '' && 
+                        isValidZipCode && 
+                        user.department !== '';
+      
     if (isFormValid) {
-      setFormIsValid(true)
-      // valid modal appear
-      setIsShown(!isShown)
-      // create an ID for the user (needed to use the MUI data-table)
-      user.id = `${user.firstName}${user.lastName}${user.department}`
-      // add the user from the form to the application's state
-      dispatch(employeesAddition(user))
+      const updatedUser = {
+        ...user,
+        id: `${user.firstName}${user.lastName}${user.department}`,
+      };
+  
+      setUserData(prevData => ({
+        ...prevData,
+        formIsValid: true,
+        isShown: true,
+        user: updatedUser,
+      }));
+  
+      // Dispatch action with the updated user
+      dispatch(employeesAddition({
+        ...updatedUser,
+        dateOfBirth: updatedUser.dateOfBirth.format('YYYY/MM/DD'), // Convert to string
+        startDate: updatedUser.startDate.format('YYYY/MM/DD'), // Convert to string
+      }));
       return;
     }
-    setFormIsValid(false)
-    // error modal appear
-    setIsShown(!isShown)
-  }
+    setUserData(prevData => ({
+      ...prevData,
+      formIsValid: false,
+      isShown: true,
+    }));
+  };
 
   return (
     <div className="newEmployeeForm">
@@ -225,8 +239,8 @@ const NewEmployeeForm = () => {
         label="First Name"
         variant="outlined"
         name={'firstName'}
-        error={errors.firstName} 
-        helperText={errors.firstName ? "Invalid first name" : ""}
+        error={userData.errors.firstName} 
+        helperText={userData.errors.firstName ? "Invalid first name" : ""}
         onChange={e => inputHandle(e)}
       />
 
@@ -237,8 +251,8 @@ const NewEmployeeForm = () => {
         aria-label="last-name"
         variant="outlined"
         name={'lastName'}
-        error={errors.lastName} 
-        helperText={errors.lastName ? "Invalid last name" : ""}
+        error={userData.errors.lastName} 
+        helperText={userData.errors.lastName ? "Invalid last name" : ""}
         onChange={e => inputHandle(e)}
       />
 
@@ -247,16 +261,19 @@ const NewEmployeeForm = () => {
           id="dateOfBirth"
           required={true}
           label="Date of Birth"
-          value={birthDate}
+          value={userData.birthDate}
           onChange={(newValue) => {
-            setBirthdate(newValue)
+            setUserData(prevData => ({
+              ...prevData,
+              birthDate: newValue,
+            }));
             datePickerHandle('dateOfBirth', newValue)
           }}
           renderInput={(params) =>
             <TextField
             {...params}
-            error={errors.dateOfBirth}
-            helperText={errors.dateOfBirth ? "Invalid date of birth" : ""}
+            error={userData.errors.dateOfBirth}
+            helperText={userData.errors.dateOfBirth ? "Invalid date of birth" : ""}
             />}
         />
       </LocalizationProvider>
@@ -266,16 +283,19 @@ const NewEmployeeForm = () => {
           id="startDate"
           required={true}
           label="Start Date"
-          value={startDate}
+          value={userData.startDate}
           onChange={(newValue) => {
-            setStartdate(newValue)
+            setUserData(prevData => ({
+              ...prevData,
+              startDate: newValue,
+            }));
             datePickerHandle('startDate', newValue)
           }}
           renderInput={(params) => 
             <TextField
             {...params}
-            error={errors.startDate}
-            helperText={errors.startDate ? "Invalid start date" : ""}
+            error={userData.errors.startDate}
+            helperText={userData.errors.startDate ? "Invalid start date" : ""}
             />}
         />
       </LocalizationProvider>
@@ -287,8 +307,8 @@ const NewEmployeeForm = () => {
         label="Street"
         variant="outlined"
         name={'street'}
-        error={errors.street}
-        helperText={errors.street ? "Invalid street address" : ""}
+        error={userData.errors.street}
+        helperText={userData.errors.street ? "Invalid street address" : ""}
         onChange={e => inputHandle(e)}
       />
 
@@ -299,8 +319,8 @@ const NewEmployeeForm = () => {
         label="City"
         variant="outlined"
         name={'city'}
-        error={errors.city}
-        helperText={errors.city ? "Invalid city" : ""}
+        error={userData.errors.city}
+        helperText={userData.errors.city ? "Invalid city" : ""}
         onChange={e => inputHandle(e)}
       />
 
@@ -311,12 +331,15 @@ const NewEmployeeForm = () => {
             <Select
               labelId="demo-simple-select-label"
               id="location demo-simple-select"
-              value={userLocationState}
+              value={userData.userLocationState}
               label="State"
               name="state"
               aria-label="state"
               onChange={(event) => {
-                setuserLocationState(event.target.value)
+                setUserData(prevData => ({
+                  ...prevData,
+                  userLocationState: event.target.value,
+                }));
                 inputHandle(event)
               }}
             >
@@ -338,8 +361,8 @@ const NewEmployeeForm = () => {
           label="Zip Code"
           variant="outlined"
           name={'zipCode'}
-          error={errors.zipCode}
-          helperText={errors.zipCode ? "Invalid Zip Code" : ""}
+          error={userData.errors.zipCode}
+          helperText={userData.errors.zipCode ? "Invalid Zip Code" : ""}
           onChange={e => inputHandle(e)}
         />
       </div>
@@ -352,11 +375,14 @@ const NewEmployeeForm = () => {
             id="department demo-simple-select"
             required={true}
             aria-label="department"
-            value={userDepartment}
+            value={userData.userDepartment}
             label="Department"
             name={'department'}
             onChange={(event) => {
-              setuserDepartment(event.target.value)
+              setUserData(prevData => ({
+                ...prevData,
+                userDepartment: event.target.value,
+              }));
               inputHandle(event)
             }}
           >
@@ -380,20 +406,23 @@ const NewEmployeeForm = () => {
         </Button>
       </div>
 
-      {isShown ? (
+      {userData.isShown ? (
         <Modal
           buttonCallback={() => {
-            setIsShown(!isShown)
-            if (formIsValid) {
-              navigate('/employee')
+            setUserData(prevData => ({
+              ...prevData,
+              isShown: !prevData.isShown
+            }));
+            if (userData.formIsValid) {
+              navigate('/employee');
             }
           }}
-          modal={formIsValid ? formValidModal : formErrorModal}
+          modal={userData.formIsValid ? formValidModal : formErrorModal}
           closeIcon={true}
           button={true}
           allowCustomization={true}
         />
-      ) : null}
+      ): null}
     </div>
   )
 }

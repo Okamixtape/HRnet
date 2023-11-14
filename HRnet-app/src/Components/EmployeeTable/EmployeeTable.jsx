@@ -27,7 +27,7 @@ const EmployeeTable = () => {
       headerName: 'Date Of Birth', 
       width: 100,
       type: 'date', 
-      valueGetter: (params) => params.value && moment(params.value).format('YYYY/MM/DD'),
+      valueGetter: (params) => params.value && moment(params.value, 'YYYY/MM/DD').format('YYYY/MM/DD'),
     },
 
     { field: 'street', headerName: 'Street', width: 250 },
@@ -40,7 +40,7 @@ const EmployeeTable = () => {
       headerName: 'Start Date', 
       width: 100,
       type: 'date',
-      valueGetter: (params) => params.value && moment(params.value).format('YYYY/MM/DD'), 
+      valueGetter: (params) => params.value && moment(params.value, 'YYYY/MM/DD').format('YYYY/MM/DD'), 
     },
   ]
 
